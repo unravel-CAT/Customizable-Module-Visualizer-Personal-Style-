@@ -38,13 +38,13 @@ ARTHESIAN.Audio.Source = (function () {
      * 
      * Initialization
      */
-    var init = function() {
+    var init = function () {
 
         // Check whether all dependencies are loaded
         var dependenciesLoaded = checkDependencies();
 
         // If not all dependencies are loaded, disable this module
-        if(!dependenciesLoaded) {
+        if (!dependenciesLoaded) {
             console.warn(`'${moduleName}' failed to load all dependencies. It will be disabled.`);
             _enabled = false;
         }
@@ -62,37 +62,37 @@ ARTHESIAN.Audio.Source = (function () {
      * 
      * @returns {boolean} Whether all dependencies where available or not
      */
-    var checkDependencies = function(){
+    var checkDependencies = function () {
 
         // Check for WE_Handler
-        if(!ARTHESIAN.Helper.checkDependency(['ARTHESIAN', 'Audio', 'WE_Handler'])) {
+        if (!ARTHESIAN.Helper.checkDependency(['ARTHESIAN', 'Audio', 'WE_Handler'])) {
             console.error(`'${moduleName}' depends upon the module 'ARTHESIAN.Audio.WE_Handler'. Please load the appropiate files.`);
             return false;
         }
-    
+
         // Check if the Helper.Array module is loaded
         if (!ARTHESIAN.Helper.checkDependency(['ARTHESIAN', 'Audio', 'Generator'])) {
             console.warn(`'${moduleName}' uses upon the module 'ARTHESIAN.Audio.Generator'. Generating Audio data will not be possible unless the module is loaded.`);
-        }else{
+        } else {
             _.generator = new ARTHESIAN.Audio.Generator();
         }
 
         // Check if the EventBus module is loaded
         if (!ARTHESIAN.Helper.checkDependency(['ARTHESIAN', 'Audio', 'Equalizer'])) {
             console.warn(`'${moduleName}' uses the 'ARTHESIAN.Audio.Equalizer'. Equalizer will not work unless the module is loaded.`);
-        }else{
+        } else {
             _.equalizer = new ARTHESIAN.Audio.Equalizer();
         }
 
         // Check if the EventBus module is loaded
         if (!ARTHESIAN.Helper.checkDependency(['ARTHESIAN', 'Audio', 'IdleHandler'])) {
             console.warn(`'${moduleName}' uses the 'ARTHESIAN.Audio.IdleHandler'. IdleMode will not work unless the module is loaded.`);
-        }else{
+        } else {
             _.idleHandler = new ARTHESIAN.Audio.IdleHandler();
         }
 
         // Check if the EventBus module is loaded
-        if(!ARTHESIAN.Helper.checkDependency(['ARTHESIAN', 'EventBus'])) {
+        if (!ARTHESIAN.Helper.checkDependency(['ARTHESIAN', 'EventBus'])) {
             console.warn(`'${moduleName}' uses the 'ARTHESIAN.EventBus' to fire events. It will still work without the EventBus, but listeners will not receive data.`);
         }
 
@@ -102,13 +102,13 @@ ARTHESIAN.Audio.Source = (function () {
 
     var _data = [];
     var _rawData = [];
-     /**
-     * Get Audio data
-     * 
-     * @param {any} length The length of the audio data set
-     * @param {boolean} raw Skip all processing, and return the raw audio data
-     * @returns {array<Number>} Array of audio representitive numbers
-     */
+    /**
+    * Get Audio data
+    * 
+    * @param {any} length The length of the audio data set
+    * @param {boolean} raw Skip all processing, and return the raw audio data
+    * @returns {array<Number>} Array of audio representitive numbers
+    */
     _.getWallpaperEngineAudioData = function (length, raw) {
 
         // Use the current transition data
@@ -126,7 +126,7 @@ ARTHESIAN.Audio.Source = (function () {
         }
 
         // Skip all processing
-        if(!_enabled) { return _data; }
+        if (!_enabled) { return _data; }
 
         // Get the requested length or use default length
         length = length || _data.length;
@@ -158,7 +158,7 @@ ARTHESIAN.Audio.Source = (function () {
     var _bassValue = 0;
     var _bassEQData = [];
     var _bassMultiplierX = 0;
-    _.getBaseMultiplier = function(minSample, maxSample, useManipulatedData) {
+    _.getBaseMultiplier = function (minSample, maxSample, useManipulatedData) {
 
         minSample = minSample || 0;
         maxSample = maxSample || 6;
@@ -167,12 +167,12 @@ ARTHESIAN.Audio.Source = (function () {
 
         // Create a sum of the samples
         for (_bassMultiplierX = minSample; _bassMultiplierX < maxSample; _bassMultiplierX++) {
-            if(useManipulatedData) {
+            if (useManipulatedData) {
                 _bassValue += _data[_bassMultiplierX] + _data[_bassMultiplierX + _data.length / 2];
-            } if(_.useEQAudioData) {
+            } if (_.useEQAudioData) {
                 _bassEQData = _.equalizer.processAudioData(_rawData, true);
                 _bassValue += _bassEQData[_bassMultiplierX] + _bassEQData[_bassMultiplierX + _bassEQData.length / 2];
-            }else {
+            } else {
                 _bassValue += _rawData[_bassMultiplierX] + _rawData[_bassMultiplierX + _rawData.length / 2];
             }
         }
@@ -183,8 +183,11 @@ ARTHESIAN.Audio.Source = (function () {
 
         // Some arbritary bassValueber
 
-        if(_.idleHandler.isIdle && WALLPAPER.visualizer.settings.idleAnimationIgnoresEffects) { return 1; }
-
+        if (_.idleHandler.isIdle && WALLPAPER.visualizer.settings.idleAnimationIgnoresEffects) { return 1; }
+        // console.log(_bassValue);
+        if (_bassValue < 0.025)
+            _bassValue *= 24;
+        // console.log(_bassValue + 1);
         return _bassValue + 1;
     }
 
@@ -194,7 +197,7 @@ ARTHESIAN.Audio.Source = (function () {
      * The rotation tween is constantly running, but only has effect if the setting is turned on
      * 
      */
-    var startBassOffsetTween = function() {
+    var startBassOffsetTween = function () {
 
         let maxXOffset = 22;
         let maxYOffset = 27;
@@ -203,12 +206,12 @@ ARTHESIAN.Audio.Source = (function () {
         createjs.Tween.get(bassOffsetY, { override: true, loop: true }).to({ value: -maxYOffset }, 44, createjs.Ease.sineInOut).to({ value: maxYOffset }, 44, createjs.Ease.sineInOut);
     }
 
-    var _bassOffsetReturnObject = { x : 0, y: 0 };
-    _.getBassOffsetValues = function(strength) {
-        
+    var _bassOffsetReturnObject = { x: 0, y: 0 };
+    _.getBassOffsetValues = function (strength) {
+
         _bassOffsetReturnObject.x = bassOffsetX.value * strength;
         _bassOffsetReturnObject.y = bassOffsetY.value * strength;
-        
+
         return _bassOffsetReturnObject;
     }
 
@@ -220,12 +223,12 @@ ARTHESIAN.Audio.Source = (function () {
      * @param {String} name Name of the event to trigger
      * @param {Object} data [Optional] Additional data to send
      */
-    var triggerEvent = function(name, data) {
-        if(ARTHESIAN.EventBus) {
-            ARTHESIAN.EventBus.trigger(name, { sender: _, data : data });
+    var triggerEvent = function (name, data) {
+        if (ARTHESIAN.EventBus) {
+            ARTHESIAN.EventBus.trigger(name, { sender: _, data: data });
         }
     }
-    
+
     // Call initialization
     init();
 

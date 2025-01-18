@@ -40,7 +40,7 @@ WALLPAPER.foreground = new visualisations.image.simple("simple_image");
 WALLPAPER.perspective = new Perspective("main, foreground, clocks");
 
 // Grid
-WALLPAPER.grid = new modules.animatedGrid({selector : "#grid-canvas"});
+WALLPAPER.grid = new modules.animatedGrid({ selector: "#grid-canvas" });
 
 // Add the visuals to the Background
 WALLPAPER.background_engine = $("#background-canvas").visualizer();
